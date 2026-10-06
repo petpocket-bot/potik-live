@@ -37,9 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 POTIK<span style={{ color: "rgba(255,255,255,.6)", fontWeight: 400 }}>.LIVE</span>
               </span>
             </a>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,.7)", letterSpacing: ".04em" }}>
-              НОВИНИ ПРО УКРАЇНУ · ОНОВЛЮЄТЬСЯ КОЖНІ 30 ХВ
-            </span>
           </div>
         </header>
 
