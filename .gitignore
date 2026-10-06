@@ -1,0 +1,19 @@
+# зависимости и сборка
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# секреты — никогда не коммитить
+.env
+.env*.local
+
+# локальная SQLite (если вернётся для разработки)
+*.db
+*.db-journal
+
+# системное
+.DS_Store
+npm-debug.log*
+.vercel

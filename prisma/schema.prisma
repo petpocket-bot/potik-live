@@ -1,0 +1,90 @@
+// Prisma schema — SQLite для прототипа.
+// Для продакшена достаточно сменить provider на "postgresql" и DATABASE_URL —
+// остальная схема не требует изменений.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model Source {
+  id                   String   @id @default(cuid())
+  name                 String
+  rssUrl               String   @unique
+  isActive             Boolean  @default(true)
+  pollIntervalMinutes  Int      @default(30)
+  lastFetchedAt        DateTime?
+  createdAt            DateTime @default(now())
+
+  rawItems             RawItem[]
+}
+
+model RawItem {
+  id                 String        @id @default(cuid())
+  sourceId           String
+  source             Source        @relation(fields: [sourceId], references: [id])
+  titleOriginal      String
+  summaryOriginal    String
+  sourceArticleUrl   String        @unique
+  publishedAt        DateTime?
+  status             String        @default("NEW") // NEW | QUEUED | DUPLICATE | FAILED | REWRITTEN
+  groupId            String?
+  group              ArticleGroup? @relation(fields: [groupId], references: [id])
+  createdAt          DateTime      @default(now())
+
+  article            Article?
+  rewriteLogs        RewriteLog[]
+
+  @@index([status])
+}
+
+model ArticleGroup {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+
+  rawItems  RawItem[]
+  articles  Article[]
+}
+
+model Article {
+  id              String        @id @default(cuid())
+  rawItemId       String        @unique
+  rawItem         RawItem       @relation(fields: [rawItemId], references: [id])
+  groupId         String
+  group           ArticleGroup  @relation(fields: [groupId], references: [id])
+
+  slug            String        @unique
+  titleRewritten  String
+  bodyRewritten   String
+  category        String        @default("ukraine-in-press")
+
+  sourceName      String
+  sourceUrl       String
+
+  status          String        @default("PUBLISHED") // PUBLISHED | UNPUBLISHED
+  publishedAt     DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+
+  @@index([status, publishedAt])
+}
+
+model RewriteLog {
+  id             String   @id @default(cuid())
+  rawItemId      String
+  rawItem        RawItem  @relation(fields: [rawItemId], references: [id])
+  llmResponseRaw String
+  result         String   // "success" | "failed"
+  failureReason  String?
+  createdAt      DateTime @default(now())
+}
+
+model AdminUser {
+  id           String @id @default(cuid())
+  username     String @unique
+  passwordHash String
+}

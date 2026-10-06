@@ -1,0 +1,18 @@
+name: Poll news sources
+
+on:
+  schedule:
+    # Каждые 30 минут. GitHub Actions cron работает в UTC, часовой пояс
+    # значения не имеет — мы просто опрашиваем источники по расписанию.
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {} # позволяет запустить вручную из вкладки Actions на GitHub
+
+jobs:
+  trigger-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron
+        run: |
+          curl -f -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/cron"
